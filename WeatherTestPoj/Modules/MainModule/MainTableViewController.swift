@@ -11,36 +11,43 @@ import RxCocoa
 import RxDataSources
 import CoreLocation
 
-class MainTableViewController: UITableViewController , CLLocationManagerDelegate {
+class MainTableViewController: UITableViewController , CLLocationManagerDelegate  , SelectCellDelegate {
+    
     private let disposeBag = DisposeBag()
     private let locationManager = CLLocationManager()
-
     private let mainCellIdentifier = "MainCellIdentifier"
     private let timesCellIdentifier = "TimesCellIdentifier"
     private let datesCellIdentifier = "DatesCellIdentifier"
-    
+    private let selectDayCell = PublishSubject<IndexPath>()
     private let selfLocationCoordinate = PublishSubject<LocationCoordinate>()
     private let viewModel = MainViewModel()
     
-    private lazy var dataSourse: RxTableViewSectionedReloadDataSource<MainTableSection> =  .init(configureCell: { [unowned self] (dataSource, tableView, indexPath, item) in
+    private lazy var dataSourse: RxTableViewSectionedReloadDataSource<MainTableSection> =  .init(configureCell: { [weak self] (dataSource, tableView, indexPath, item) in
+        guard let self = self else { return UITableViewCell()}
+
         switch item {
         case .mainCell(model:let data):
-            return createMainCell(data: data, indexPath: indexPath)
+            return self.createMainCell(data: data, indexPath: indexPath)
         case .timesCell(model:let data) :
-            return createTimesCell(data: data, indexPath: indexPath)
+            return self.createTimesCell(data: data, indexPath: indexPath)
         case .datesCell(model:let data):
-            return createDatesCell(data: data, indexPath: indexPath)
+            return self.createDatesCell(data: data, indexPath: indexPath)
         }
     })
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
-        
-        let output = viewModel.transform(input: MainViewModel.Input(coordinate: selfLocationCoordinate))
+        let output = viewModel.transform(input: MainViewModel.Input(coordinate: selfLocationCoordinate, selectCell: selectDayCell))
+        subscribeOnSelectCell()
         bindDataToTableView(output: output)
         createTableView()
         setupLocationManager()
+        navigationSettings()
+    }
+    private func navigationSettings() {
+        navigationController?.navigationBar.backgroundColor = GlobalData.share.colorFirstSection
+        navigationItem.backButtonTitle = ""
+        navigationController?.navigationBar.tintColor = .white
     }
     
     // subscribes
@@ -49,10 +56,16 @@ class MainTableViewController: UITableViewController , CLLocationManagerDelegate
         tableView.dataSource = nil
         tableView
             .rx.setDelegate(self).disposed(by: disposeBag)
+        
         output.items.drive(tableView.rx.items(dataSource: dataSourse)).disposed(by: disposeBag)
     }
     
-    
+    private func subscribeOnSelectCell() {
+        tableView.rx.itemSelected.subscribe(onNext: { [weak self] indexPath in
+            guard let self = self else { return }
+            self.selectDayCell.onNext(indexPath)
+        }).disposed(by: disposeBag)
+    }
 }
 
 // creation
@@ -66,20 +79,28 @@ extension MainTableViewController {
     
     private func createMainCell(data:MainModelCell,indexPath:IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: mainCellIdentifier, for: indexPath) as? MainCell else { return UITableViewCell() }
-        cell.data = MainModelCell()
+        cell.data = data
+        cell.tapGeopositionButton.subscribe(onNext:{[weak self] _ in
+            guard let self = self else { return }
+            let searchController = SearchViewController.instantiate()
+            searchController.selectCellDelegate = self
+            self.navigationController?.pushViewController(searchController, animated: true)
+        }).disposed(by: cell.externalDisposeBag)
         cell.selectionStyle = .none
        return cell
     }
     
     private func createTimesCell(data:TimesModelCell,indexPath:IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: timesCellIdentifier, for: indexPath) as? TimesCell else { return UITableViewCell() }
-        cell.data = TimesModelCell()
+        cell.data = data
+        cell.selectionStyle = .none
        return cell
     }
     
     private func createDatesCell(data:DatesModelCell,indexPath:IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: datesCellIdentifier, for: indexPath) as? DatesCell else { return UITableViewCell() }
-        cell.data = DatesModelCell()
+        cell.data = data
+        cell.selectionStyle = .none
        return cell
     }
     
@@ -91,6 +112,11 @@ extension MainTableViewController {
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             locationManager.startUpdatingLocation()
         }
+    }
+    
+    func newCoordinate(latitude: Double, longitude: Double) {
+        selfLocationCoordinate.onNext(LocationCoordinate(latitude: String(latitude), longitude: String(longitude)))
+
     }
     
 }

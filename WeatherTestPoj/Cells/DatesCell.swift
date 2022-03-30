@@ -12,11 +12,13 @@ class DatesCell: UITableViewCell {
     var data:DatesModelCell? {
         didSet {
             guard let data = data else { return }
-            color = .black
-            createLabels(dayOfTheWeekText: "ЧТ", temperatureRangeText: "22°/27°")
-            createImage(imageName:  "cloud.sun")
+            color = data.isSelect ? GlobalData.share.colorSecondSection : .black
+
+            createLabels(dayOfTheWeekText: data.weekDay, temperatureRangeText: data.temperature)
+            createImage(imageName: data.cloud.rawValue)
         }
     }
+    
     private var color:UIColor = .black
     
     private var dayOfTheWeekLabel = UILabel()

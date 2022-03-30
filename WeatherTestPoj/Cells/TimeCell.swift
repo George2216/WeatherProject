@@ -5,6 +5,7 @@
 //  Created by Heorhii Churikov on 29.03.2022.
 //
 
+
 import UIKit
 import SnapKit
 
@@ -13,9 +14,9 @@ class TimeCell: UICollectionViewCell {
         didSet {
             guard let data = data else { return }
             self.backgroundColor = GlobalData.share.colorSecondSection
-            createTimeView(hour: "19", minute: "00")
-            createImageView(name: "cloud.sun")
-            createTemperatureLabel(text: "26°")
+            createTimeView(hour: data.hour, minute: "00" )
+            createImageView(name: data.cloud.rawValue)
+            createTemperatureLabel(text: data.temperature)
         }
     }
     
@@ -25,7 +26,7 @@ class TimeCell: UICollectionViewCell {
     private var temperatureLabel = UILabel()
     
     private func createTimeView(hour:String,minute:String) {
-        timeView = TimeView(frame: .zero, hour: hour, minute: minute)
+        timeView.setup(frame: .zero, hour: hour, minute: minute)
         self.contentView.addSubview(timeView)
         
         timeView.snp.makeConstraints { make in

@@ -18,6 +18,7 @@ class TimesCell: UITableViewCell {
             backgroundColor = GlobalData.share.colorSecondSection
             createCollectionViewLayout()
             createCollectionView()
+            collectionContent.onNext(data.timeArray)
         }
     }
     
@@ -26,7 +27,7 @@ class TimesCell: UITableViewCell {
     private var collectionLayout = UICollectionViewFlowLayout()
 
     private var collectionView = UICollectionView(frame: .zero, collectionViewLayout: .init())
-    private let collectionContent = BehaviorSubject<[TimeModelCell]>(value: [TimeModelCell(),TimeModelCell(),TimeModelCell(),TimeModelCell(),TimeModelCell(),TimeModelCell(),TimeModelCell(),TimeModelCell(),TimeModelCell(),TimeModelCell()])
+    private let collectionContent = BehaviorSubject<[TimeModelCell]>(value: [])
     
     private func createCollectionViewLayout() {
         collectionLayout.scrollDirection = .horizontal

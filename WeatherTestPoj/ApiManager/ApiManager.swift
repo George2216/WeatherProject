@@ -25,10 +25,14 @@ class ApiManager:ApiManagerContract {
         request.httpBody = data
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error  in
+            DispatchQueue.main.async {
+                
+            
             guard let data = data else {
                 complition(nil, .serverOutputError)
                 return
             }
+            
             do {
                 let output = try JSONDecoder().decode(Output.self, from: data)
                 complition(output, nil)
@@ -38,6 +42,7 @@ class ApiManager:ApiManagerContract {
             }
 
         }
+        }
         task.resume()
     }
     
@@ -45,14 +50,21 @@ class ApiManager:ApiManagerContract {
 }
 
 enum Requests {
-case getItems
-case getCategories
+    private var firstApiKey:String {
+        "676dcad6869d54f57a00be0eae45e464"
+    }
+
+    private var secondApiKey:String {
+        "1751a0eba0566f490cd827d75e38dfb7"
+    }
+    case getMainWeatherData(lat:Double,lon:Double)
+    case getCityes(name:String)
     var urlString:String {
         switch self {
-        case .getItems:
-            return "https://violadent.com/AndroidAPI/new/json/feed.json"
-        case .getCategories:
-            return "https://violadent.com/AndroidAPI/?"
+        case .getMainWeatherData(lat: let lat, lon: let lon):
+            return "http://api.openweathermap.org/data/2.5/forecast?lat=\(lat)&lon=\(lon)&appid=\(firstApiKey)"
+        case .getCityes(name: let name):
+            return "http://api.positionstack.com/v1/forward?access_key=\(secondApiKey)&query=\(name)"
         }
     }
 }

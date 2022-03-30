@@ -12,16 +12,14 @@ class TimeView: UIView {
 
    
     var stack = UIStackView()
+    var hourLabel = UILabel()
+    var minuteLabel = UILabel()
     
-    convenience init(frame:CGRect,hour:String,minute:String) {
-        self.init(frame: frame)
-        var hourLabel = UILabel()
-        var minuteLabel = UILabel()
-        
+    func setup(frame:CGRect,hour:String,minute:String) {
         createLabel(label: &hourLabel, text: hour, font: UIFont.systemFont(ofSize: 20))
         createLabel(label: &minuteLabel, text: minute, font: UIFont.systemFont(ofSize: 12))
         
-        stack = UIStackView(arrangedSubviews: [ hourLabel,minuteLabel ])
+        stack = UIStackView(arrangedSubviews: [hourLabel,minuteLabel ])
         stack.distribution = .fillEqually
         stack.alignment = .top
         stack.axis = .horizontal
@@ -34,6 +32,8 @@ class TimeView: UIView {
             make.trailing.equalToSuperview().inset(10)
         }
     }
+    
+   
     
     
     
