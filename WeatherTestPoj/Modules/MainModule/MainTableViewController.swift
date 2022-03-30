@@ -12,7 +12,7 @@ import RxDataSources
 import CoreLocation
 
 class MainTableViewController: UITableViewController , CLLocationManagerDelegate  , SelectCellDelegate {
-    
+    private var getLocationOnce = true
     private let disposeBag = DisposeBag()
     private let locationManager = CLLocationManager()
     private let mainCellIdentifier = "MainCellIdentifier"
@@ -125,7 +125,9 @@ extension MainTableViewController {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
           guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate else { return }
+        guard getLocationOnce else { return }
         selfLocationCoordinate.onNext(LocationCoordinate(latitude: String(locValue.latitude), longitude: String(locValue.longitude)))
+        getLocationOnce = false
       }
 }
 
