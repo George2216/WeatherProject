@@ -773,6 +773,7 @@
 				DEVELOPMENT_TEAM = FUF7HHD92K;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WeatherTestPoj/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Weather;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = lll;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = lll;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -804,6 +805,7 @@
 				DEVELOPMENT_TEAM = FUF7HHD92K;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WeatherTestPoj/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Weather;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = lll;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = lll;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
