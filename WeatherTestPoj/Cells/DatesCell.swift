@@ -30,7 +30,6 @@ class DatesCell: UITableViewCell {
     private var temperatureRangeLabel = UILabel()
     private let weatherImageView = UIImageView()
     
-    
     private func createLabels(dayOfTheWeekText:String,temperatureRangeText:String) {
         createLabel(label: &dayOfTheWeekLabel, text: dayOfTheWeekText)
         createLabel(label: &temperatureRangeLabel, text: temperatureRangeText)
@@ -86,8 +85,5 @@ class DatesCell: UITableViewCell {
         label.font = UIFont.boldSystemFont(ofSize: 20)
         contentView.addSubview(label)
     }
-    
-
-    
     
 }

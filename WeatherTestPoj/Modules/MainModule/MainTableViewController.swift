@@ -24,7 +24,6 @@ class MainTableViewController: UITableViewController , CLLocationManagerDelegate
     
     private lazy var dataSourse: RxTableViewSectionedReloadDataSource<MainTableSection> =  .init(configureCell: { [weak self] (dataSource, tableView, indexPath, item) in
         guard let self = self else { return UITableViewCell()}
-
         switch item {
         case .mainCell(model:let data):
             return self.createMainCell(data: data, indexPath: indexPath)
@@ -43,20 +42,34 @@ class MainTableViewController: UITableViewController , CLLocationManagerDelegate
         createTableView()
         setupLocationManager()
         navigationSettings()
+        
     }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setStatusBar()
+    }
+    
+    func setStatusBar() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = GlobalData.share.colorFirstSection
+        navigationController?.navigationBar.standardAppearance = appearance;
+        navigationController?.navigationBar.scrollEdgeAppearance = navigationController?.navigationBar.standardAppearance
+        navigationController?.hideHairline()
+        }
+    
+  
     private func navigationSettings() {
         navigationController?.navigationBar.backgroundColor = GlobalData.share.colorFirstSection
         navigationItem.backButtonTitle = ""
         navigationController?.navigationBar.tintColor = .white
     }
     
-    // subscribes
     private func bindDataToTableView(output:MainViewModel.Output) {
         tableView.delegate = nil
         tableView.dataSource = nil
         tableView
             .rx.setDelegate(self).disposed(by: disposeBag)
-        
         output.items.drive(tableView.rx.items(dataSource: dataSourse)).disposed(by: disposeBag)
     }
     
@@ -70,11 +83,11 @@ class MainTableViewController: UITableViewController , CLLocationManagerDelegate
 
 // creation
 extension MainTableViewController {
+    
     private func createTableView() {
         tableView.register(MainCell.self, forCellReuseIdentifier: mainCellIdentifier)
         tableView.register(TimesCell.self, forCellReuseIdentifier: timesCellIdentifier)
         tableView.register(DatesCell.self, forCellReuseIdentifier: datesCellIdentifier)
-        
     }
     
     private func createMainCell(data:MainModelCell,indexPath:IndexPath) -> UITableViewCell {
@@ -104,6 +117,11 @@ extension MainTableViewController {
        return cell
     }
     
+   
+}
+
+extension MainTableViewController {
+    
     private func setupLocationManager() {
         locationManager.requestAlwaysAuthorization()
         locationManager.requestWhenInUseAuthorization()
@@ -118,20 +136,15 @@ extension MainTableViewController {
         selfLocationCoordinate.onNext(LocationCoordinate(latitude: String(latitude), longitude: String(longitude)))
     }
     
-}
-
-extension MainTableViewController {
-    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate else { return }
         guard viewModel.getCoordinates == nil else {
             getLocationOnce = false
-            self.selfLocationCoordinate.onNext(viewModel.getCoordinates!)
+        self.selfLocationCoordinate.onNext(viewModel.getCoordinates!)
             return
         }
-        
         guard getLocationOnce else { return }
-        selfLocationCoordinate.onNext(LocationCoordinate(latitude: String(locValue.latitude), longitude: String(locValue.longitude)))
+        self.selfLocationCoordinate.onNext(LocationCoordinate(latitude: String(locValue.latitude), longitude: String(locValue.longitude)))
         getLocationOnce = false
     }
 }
