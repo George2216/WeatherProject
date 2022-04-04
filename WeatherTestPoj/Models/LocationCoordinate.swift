@@ -10,3 +10,8 @@ struct LocationCoordinate {
     var latitude:String
     var longitude:String
 }
+
+struct LocationCoordinateDouble {
+    var latitude:Double
+    var longitude:Double
+}

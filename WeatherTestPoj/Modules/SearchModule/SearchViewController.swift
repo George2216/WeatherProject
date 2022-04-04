@@ -10,7 +10,7 @@ import RxSwift
 import RxCocoa
 
 protocol SelectCellDelegate {
-    func newCoordinate(latitude:Double, longitude:Double)
+    func setCoordinatesFromDelegate(latitude:Double, longitude:Double)
 }
 class SearchViewController: UITableViewController ,Storyboarded {
     private let disposeBag = DisposeBag()
@@ -18,10 +18,11 @@ class SearchViewController: UITableViewController ,Storyboarded {
     private var viewModel = SearchViewModel()
     private var tapSearch = PublishSubject<Void>()
     private let cellIdentifier = "SearchCellIdentifier"
+    private let saveCoordinate = PublishSubject<LocationCoordinateDouble>()
     var selectCellDelegate:SelectCellDelegate?
     override func viewDidLoad() {
         super.viewDidLoad()
-        let output = viewModel.transform(input: SearchViewModel.Input(searchBarText: searchBar.rx.text.orEmpty.asObservable(), tapSearch: tapSearch))
+        let output = viewModel.transform(input: SearchViewModel.Input(searchBarText: searchBar.rx.text.orEmpty.asObservable(), tapSearch: tapSearch, setCoordinate: saveCoordinate))
         
         createSearhBar()
         createRightBarButton()
@@ -60,8 +61,11 @@ class SearchViewController: UITableViewController ,Storyboarded {
     private func subscribeOnTapCell() {
         tableView.rx.modelSelected(Cities.self).subscribe(onNext: { [weak self] cities in
             guard let self = self else { return }
-            self.selectCellDelegate?.newCoordinate(latitude: cities.latitude, longitude: cities.longitude)
-            self.navigationController?.popViewController(animated: true)
+            self.selectCellDelegate?.setCoordinatesFromDelegate(latitude: cities.latitude, longitude: cities.longitude)
+            self.navigationController?.popViewController(animated: true, completion: { [weak self]  in
+                guard let self = self else { return }
+                self.saveCoordinate.onNext(LocationCoordinateDouble(latitude: cities.latitude, longitude: cities.longitude))
+            })
         }).disposed(by: disposeBag)
     }
     

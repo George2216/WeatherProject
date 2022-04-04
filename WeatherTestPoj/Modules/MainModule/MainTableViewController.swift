@@ -114,9 +114,8 @@ extension MainTableViewController {
         }
     }
     
-    func newCoordinate(latitude: Double, longitude: Double) {
+    func setCoordinatesFromDelegate(latitude: Double, longitude: Double) {
         selfLocationCoordinate.onNext(LocationCoordinate(latitude: String(latitude), longitude: String(longitude)))
-
     }
     
 }
@@ -124,10 +123,16 @@ extension MainTableViewController {
 extension MainTableViewController {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-          guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate else { return }
+        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate else { return }
+        guard viewModel.getCoordinates == nil else {
+            getLocationOnce = false
+            self.selfLocationCoordinate.onNext(viewModel.getCoordinates!)
+            return
+        }
+        
         guard getLocationOnce else { return }
         selfLocationCoordinate.onNext(LocationCoordinate(latitude: String(locValue.latitude), longitude: String(locValue.longitude)))
         getLocationOnce = false
-      }
+    }
 }
 

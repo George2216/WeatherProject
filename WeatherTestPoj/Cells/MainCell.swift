@@ -29,7 +29,7 @@ class MainCell: UITableViewCell {
         }
     }
     override func prepareForReuse() {
-                    super.prepareForReuse()
+            super.prepareForReuse()
             externalDisposeBag = DisposeBag()
         }
     private let font:CGFloat = 25

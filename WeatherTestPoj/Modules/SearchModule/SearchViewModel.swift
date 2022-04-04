@@ -16,10 +16,10 @@ extension SearchViewModel {
 }
 class SearchViewModel:ViewModel {
     private let disposeBag = DisposeBag()
-    
     private var tableContent = BehaviorSubject<[Cities]>(value: [])
     func transform(input: Input) -> Output {
         getCitiesData(input: input)
+        saveCoordinate(input: input)
         return Output(tableContent: tableContentDriver)
     }
     
@@ -34,21 +34,25 @@ class SearchViewModel:ViewModel {
                     print(error.debugDescription)
                     return
                 }
-                
                 self.tableContent.onNext(data.data)
             }
-            
         }).disposed(by: disposeBag)
         
-        
-        
+       
     }
     
-    
+    private func saveCoordinate(input:Input) {
+        input.setCoordinate.subscribe(onNext: { coordinate in
+            UserDefaults.standard.setValue(String(coordinate.latitude), forKeyPath: CoordinatesUDKeys.latitude.rawValue)
+            UserDefaults.standard.setValue(String(coordinate.longitude), forKeyPath: CoordinatesUDKeys.longitude.rawValue)
+        }).disposed(by: disposeBag)
+    }
     
     struct Input {
         var searchBarText:Observable<String>
         var tapSearch:Observable<Void>
+        var setCoordinate:Observable<LocationCoordinateDouble>
+        
     }
     
     struct Output {

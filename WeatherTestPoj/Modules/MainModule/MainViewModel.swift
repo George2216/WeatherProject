@@ -30,6 +30,12 @@ class MainViewModel:ViewModel {
     private var items = BehaviorSubject<[MainTableSection]>(value: [])
     private let disposeBag = DisposeBag()
     
+    var getCoordinates:LocationCoordinate? {
+        guard  let latitude = UserDefaults.standard.value(forKey: CoordinatesUDKeys.latitude.rawValue) as? String else { return nil }
+        guard let longitude = UserDefaults.standard.value(forKey: CoordinatesUDKeys.longitude.rawValue) as? String else { return nil }
+        
+        return LocationCoordinate(latitude: latitude, longitude: longitude)
+    }
     
     func transform(input: Input) -> Output {
         subscribeOnChangeLocation(input: input)
@@ -38,21 +44,11 @@ class MainViewModel:ViewModel {
         return Output(items: itemsDriver)
     }
     
-    struct Input {
-        var coordinate:Observable<LocationCoordinate>
-        var selectCell:Observable<IndexPath>
-    }
-    
-    struct Output {
-        var items:Driver<[MainTableSection]>
-    }
-    
     private func subscribeOnSelectCell(input: Input) {
         input.selectCell.subscribe(onNext:{[weak self] indexPath in
             guard let self = self else { return }
             guard indexPath.section == 2 else { return }
             self.selectedItem.onNext(indexPath.row)
-            
         }).disposed(by: disposeBag)
         
     }
@@ -61,7 +57,7 @@ class MainViewModel:ViewModel {
         input.coordinate.subscribe(onNext: {[weak self] coordinate in
             guard let self = self else { return }
             let apiManager = ApiManager()
-            apiManager.sendRequest(type: WeatherMainModel.self, method: .GET, requestType: .getMainWeatherData(lat: Double(coordinate.latitude)!, lon: Double(coordinate.longitude)!), data: nil) {[weak self] data, error in
+            apiManager.sendRequest(type: WeatherMainModel.self, method: .GET, requestType: .getMainWeatherData(lat: Double(coordinate.latitude) ?? 0, lon: Double(coordinate.longitude) ?? 0), data: nil) {[weak self] data, error in
                 guard let self = self else { return }
                 guard let data = data else {
                     print(error?.localizedDescription ?? "")
@@ -77,11 +73,9 @@ class MainViewModel:ViewModel {
             guard let self = self else { return }
             guard !data.list.isEmpty else { return }
             let dataOfIndex = data.list[selectIntex]
-            
             let listOfDates = self.createListOfDates(data:data.list)
-            
-
             let fullDate = listOfDates[selectIntex][0].dt_txt.fullDateSpase() ?? Date()
+            
             let weekName = fullDate.getWeekDay().uppercased()
             let monthName = fullDate.getMonthName().uppercased()
             let numberDay = fullDate.getNumberDay()
@@ -198,7 +192,14 @@ class MainViewModel:ViewModel {
         return  round((celvin - 273.15) * 10)/10
     }
     
+    struct Input {
+        var coordinate:Observable<LocationCoordinate>
+        var selectCell:Observable<IndexPath>
+    }
     
+    struct Output {
+        var items:Driver<[MainTableSection]>
+    }
     
 }
 extension MainViewModel {
